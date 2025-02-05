@@ -120,6 +120,22 @@ public class ProductService {
         productFolderRepository.save(new ProductFolder(product, folder));
     }
 
+    @Transactional(readOnly = true)
+    public Page<ProductResponseDto> getProductsInFolder(Long folderId, int page, int size, String sortBy, boolean isAsc, User user) {
+
+        // 페이징 처리
+        Sort.Direction direction = isAsc ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Sort sort = Sort.by(direction, sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        // 로그인 한 유저가 등록한 특정 폴더에 속해있는 상품을 가져옵니다.
+        Page<Product> products = productRepository.findAllByUserAndProductFolderList_FolderId(user, folderId, pageable);
+
+        Page<ProductResponseDto> responseDtoList = products.map(ProductResponseDto::new);
+
+        return responseDtoList;
+    }
+
 //    //모든 상품 조회 기능 (Admin 계정 한정)
 //    public List<ProductResponseDto> getAllProducts() {
 //        List<Product> productList = productRepository.findAll(); //admin계정으로 들어왔을 땐 모든 상품 조회 가능
