@@ -5,9 +5,14 @@ import com.sparta.myselectshop.dto.ProductRequestDto;
 import com.sparta.myselectshop.dto.ProductResponseDto;
 import com.sparta.myselectshop.entity.Product;
 import com.sparta.myselectshop.entity.User;
+import com.sparta.myselectshop.entity.UserRoleEnum;
 import com.sparta.myselectshop.naver.dto.ItemDto;
 import com.sparta.myselectshop.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,14 +50,30 @@ public class ProductService {
     }
 
     //DB 조회
-    public List<ProductResponseDto> getProducts(User user) {
-        List<Product> productList = productRepository.findAllByUser(user);
-        List<ProductResponseDto> responseDtoList = new ArrayList<>();
+    public Page<ProductResponseDto> getProducts(User user, int page, int size, String sortBy, boolean isAsc) {
+        //페이징
+        Sort.Direction direction = isAsc ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Sort sort = Sort.by(direction, sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
 
-        for (Product product : productList) {
-            responseDtoList.add(new ProductResponseDto(product));
+        //User 권한 확인
+        UserRoleEnum userRoleEnum = user.getRole();
+
+        Page<Product> productList;
+
+        if(userRoleEnum == UserRoleEnum.USER) {
+            productList = productRepository.findAllByUser(user, pageable);
+        } else {
+            productList = productRepository.findAll(pageable);
         }
-        return responseDtoList;
+
+//        List<Product> productList = productRepository.findAllByUser(user);
+//        List<ProductResponseDto> responseDtoList = new ArrayList<>();
+//
+//        for (Product product : productList) {
+//            responseDtoList.add(new ProductResponseDto(product));
+//        }
+        return productList.map(ProductResponseDto::new); //convert
     }
 
     //최신 가격으로 업데이트 해주는 메소드
@@ -65,14 +86,14 @@ public class ProductService {
 
     }
 
-    //모든 상품 조회 기능 (Admin 계정 한정)
-    public List<ProductResponseDto> getAllProducts() {
-        List<Product> productList = productRepository.findAll(); //admin계정으로 들어왔을 땐 모든 상품 조회 가능
-        List<ProductResponseDto> responseDtoList = new ArrayList<>();
-
-        for (Product product : productList) {
-            responseDtoList.add(new ProductResponseDto(product));
-        }
-        return responseDtoList;
-    }
+//    //모든 상품 조회 기능 (Admin 계정 한정)
+//    public List<ProductResponseDto> getAllProducts() {
+//        List<Product> productList = productRepository.findAll(); //admin계정으로 들어왔을 땐 모든 상품 조회 가능
+//        List<ProductResponseDto> responseDtoList = new ArrayList<>();
+//
+//        for (Product product : productList) {
+//            responseDtoList.add(new ProductResponseDto(product));
+//        }
+//        return responseDtoList;
+//    }
 }
