@@ -1,7 +1,9 @@
 spring:
+  config:
+    import: optional:.env
   datasource:
-    url: jdbc:mysql://192.168.11.150:3306/shop
-    username: root
+    url: jdbc:mysql://springboot-database.cvqi4ygm2qsr.ap-northeast-2.rds.amazonaws.com:3306/shop
+    username: admin
     password: 154900th
     driver-class-name: com.mysql.cj.jdbc.Driver
 
