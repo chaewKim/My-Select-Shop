@@ -9,6 +9,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class ProductService {
@@ -16,15 +19,14 @@ public class ProductService {
     private final ProductRepository productRepository;
     public static final int MIN_MY_PRICE = 100;
 
-    /*
-    * 저장
-    * */
+    //저장
     public ProductResponseDto createProduct(ProductRequestDto requestDto) {
         //Dto -> Entity
         Product product = productRepository.save(new Product(requestDto));
         return new ProductResponseDto(product);
     }
 
+    //수정
     @Transactional
     public ProductResponseDto updateProduct(Long id, ProductMypriceRequestDto requestDto) {
         int myprice =requestDto.getMyprice();
@@ -38,5 +40,16 @@ public class ProductService {
         product.update(requestDto);
         return new ProductResponseDto(product);
 
+    }
+
+    //DB 조회
+    public List<ProductResponseDto> getProducts() {
+        List<Product> productList = productRepository.findAll();
+        List<ProductResponseDto> responseDtoList = new ArrayList<>();
+
+        for (Product product : productList) {
+            responseDtoList.add(new ProductResponseDto(product));
+        }
+        return responseDtoList;
     }
 }
