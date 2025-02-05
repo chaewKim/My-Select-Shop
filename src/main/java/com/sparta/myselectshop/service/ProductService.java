@@ -50,6 +50,7 @@ public class ProductService {
     }
 
     //DB 조회
+    @Transactional(readOnly = true)
     public Page<ProductResponseDto> getProducts(User user, int page, int size, String sortBy, boolean isAsc) {
         //페이징
         Sort.Direction direction = isAsc ? Sort.Direction.ASC : Sort.Direction.DESC;
